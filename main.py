@@ -18,10 +18,11 @@ def save_task(tasks):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("task", type=str, nargs="?", help="Task to add")
-parser.add_argument("-v", "--version", help="Show current version", action="version", version=f"untitled todo program V{version}")
+parser.add_argument("-v", "--version", help="Show current version", action="version", version=f"untitled todo program v{version}")
 parser.add_argument("-l", "--list", help="List all tasks", action="store_true")
 parser.add_argument("-c", "--complete", type=int, help="Mark a task as complete by ID")
 parser.add_argument("-i", "--incomplete", type=int, help="Mark a task as incomplete by ID")
+parser.add_argument("-p", "--priority", type=int, help="Toggle a task as priority by ID")
 parser.add_argument("-d", "--delete", type=int, help="Delete a task by ID")
 args = parser.parse_args()
 
@@ -36,7 +37,8 @@ if args.list:
     else:
         for task in tasks:
             status = "x" if task["done"] else " "
-            print(f"[{status}] {task['id']}: {task['task']}")
+            priority = "!" if task["priority"] else " "
+            print(f"[{status}] [{priority}] {task['id']}: {task['task']}")
     sys.exit(0)
 elif args.complete:
     tasks = load_tasks()
@@ -54,6 +56,18 @@ elif args.incomplete:
             save_task(tasks)
             print(f"Task {args.incomplete} marked as incomplete")
             break
+elif args.priority:
+    tasks = load_tasks()
+    for task in tasks:
+        if task["id"] == args.priority:
+            if task["priority"] == False:
+                task["priority"] = True
+                save_task(tasks)
+                print(f"Task {args.priority} marked as priority")
+            else:
+                task["priority"] = False
+                save_task(tasks)
+                print(f"Task {args.priority} unmarked as priority")
 elif args.delete:
     tasks = load_tasks()
     new_tasks = []
@@ -70,7 +84,7 @@ elif args.task:
     else:
         new_id = tasks[-1]["id"] + 1
 
-    tasks.append({"id": new_id, "task": args.task, "done": False})
+    tasks.append({"id": new_id, "task": args.task, "done": False, "priority": False})
     save_task(tasks)
 
     print(f"Task {args.task} added with ID of {new_id}")
